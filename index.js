@@ -12,20 +12,28 @@ app.get('/', function(req, res){
 
 io.on('connection', function(socket){
 
-	socket.broadcast.emit('other user connected', {
-		id: socket.id,
-		otherNickname: socket.handshake.query.nickname
-	})
+	const otherNickname = socket.handshake.query.nickname
+	const userCredential = {
+		otherNickname,
+		id: socket.id
+	}
+
+	socket.broadcast.emit('other user connected', {...userCredential})
 
 	socket.on('disconnect', function(){
-		socket.broadcast.emit('other user disconnected', {
-			id: socket.id,
-			otherNickname: socket.handshake.query.nickname
-		})
+		socket.broadcast.emit('other user disconnected', {...userCredential})
 	})
 
 	socket.on('chat message', function(msg){
-		socket.broadcast.emit('chat message', `[ ${socket.handshake.query.nickname} ]: ${msg}`)
+		socket.broadcast.emit('chat message', `[ ${otherNickname} ]: ${msg}`)
+	})
+
+	socket.on('someone is typing', function(){
+		socket.broadcast.emit('someone is typing', {...userCredential})
+	})
+
+	socket.on('someone finish typing', function(){
+		socket.broadcast.emit('someone finish typing', {...userCredential})
 	})
 })
 

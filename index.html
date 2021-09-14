@@ -14,11 +14,20 @@
 
       #messages { list-style-type: none; margin: 0; padding: 0; }
       #messages > li { padding: 0.5rem 1rem; }
-      #messages > li:nth-child(odd) { background: #efefef; }		
+      #messages > li:nth-child(odd) { background: #efefef; }	
+      #navbar {
+      	width: 100%;
+      	height: 3rem;
+      	display: flex;
+      	justify-content: center;
+      	align-items: center;
+      	background: salmon;
+      	color: white;
+      }
 	</style>
 </head>
 <body>
-	<nav class="navbar"></nav>
+	<nav id="navbar" class="navbar"></nav>
 	<ul id="messages"></ul>
 	<form action="" id="form">
 		<input type="text" id="input">
@@ -45,6 +54,20 @@
 			}
 		})
 
+		input.addEventListener('keydown', function(e){
+			socket.emit('someone is typing')
+		})
+
+		input.addEventListener('keyup', function(e){
+			socket.emit('someone finish typing')
+		})
+
+		socket.on('someone is typing', function({otherNickname}){
+			someoneIsTyping(otherNickname)
+		})
+
+		socket.on('someone finish typing', debounce(someoneFinishTyping, 1000))
+
 		socket.on('other user connected', function({otherNickname}){
 			pushMessage(`***${otherNickname} is connected***`)
 		})
@@ -63,6 +86,30 @@
 			messages.appendChild(item)
 			window.scrollTo(0, document.body.scrollHeight)
 		}
+
+		const getNavbar = () => document.getElementById('navbar')
+
+		function someoneIsTyping(nickname){
+			const navbar = getNavbar()
+			if(nickname) navbar.innerText = `${nickname} is typing ...`
+		}
+
+		function someoneFinishTyping(){
+			const navbar = getNavbar()
+			navbar.innerText = ''
+		}
+
+		function debounce(callback, delay){
+			let timer
+
+			return function(){
+				clearTimeout(timer)
+
+				timer = setTimeout(() => callback.apply(this, arguments), delay)
+			}
+		}
+
+		someoneIsTyping()
 	</script>
 </body>
 </html>
