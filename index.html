@@ -18,6 +18,7 @@
 	</style>
 </head>
 <body>
+	<nav class="navbar"></nav>
 	<ul id="messages"></ul>
 	<form action="" id="form">
 		<input type="text" id="input">
@@ -25,7 +26,11 @@
 	</form>
 	<script src="/socket.io/socket.io.js"></script>
 	<script>
-		const socket = io()
+		const nickname = prompt()
+
+		const socket = io({
+			query: {nickname}
+		})
 
 		const form = document.getElementById('form')
 		const input = document.getElementById('input')
@@ -39,12 +44,24 @@
 			}
 		})
 
+		socket.on('other user connected', function({otherNickname}){
+			pushMessage(`***${otherNickname} is connected***`)
+		})
+
+		socket.on('other user disconnected', function({otherNickname}){
+			pushMessage(`***${otherNickname} is disconnected***`)
+		})
+
 		socket.on('chat message', function(msg){
+			pushMessage(msg)
+		})
+
+		function pushMessage(msg){
 			const item = document.createElement('li')
 			item.textContent = msg
 			messages.appendChild(item)
 			window.scrollTo(0, document.body.scrollHeight)
-		})
+		}
 	</script>
 </body>
 </html>
