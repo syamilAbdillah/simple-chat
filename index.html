@@ -39,6 +39,7 @@
 		form.addEventListener('submit', function(e){
 			e.preventDefault()
 			if(input.value){
+				pushMessage(`[ ${nickname} ]: ${input.value}`)
 				socket.emit('chat message', input.value)
 				input.value = ''
 			}
